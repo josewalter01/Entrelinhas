@@ -19,8 +19,11 @@ class Post < ApplicationRecord
 
   scope :chronological, -> { order(published_on: :desc, created_at: :desc, id: :desc) }
 
-  def self.for_feed(filter)
-    posts = chronological.preload(attachment_attachment: :blob)
+  def self.for_feed(filter, order: nil)
+    score = "(SELECT COALESCE(SUM(votes.value), 0) FROM votes WHERE votes.post_id = posts.id)"
+    posts = select("posts.*, #{score} AS vote_score")
+    posts = posts.order(Arel.sql("vote_score DESC")) unless order == "recentes"
+    posts = posts.chronological.preload(attachment_attachment: :blob)
     types = FEED_TYPES[filter]
     return posts unless types
 

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="<%= session[:theme] || "claro" %>">
+<head>
+  <meta charset="utf-8">
+  <title>Votos da publicação</title>
+  <link rel="stylesheet" href="/assets/caderno.css?v=navegacao-5">
+</head>
+<body class="ballot">
+  <div class="vote-group" role="group" aria-label="Votos da publicação">
+    <% [[1, "↑", "Voto positivo"], [-1, "↓", "Voto negativo"]].each do |value, arrow, label| %>
+      <% if value == -1 %><span aria-label="Saldo de votos"><%= score %></span><% end %>
+      <% if signed_author %>
+        <%= button_to arrow, vote_post_path(post), method: :put, params: { value: current_vote == value ? 0 : value },
+              title: label, aria: { label: label, pressed: (current_vote == value).to_s } %>
+      <% else %>
+        <%= link_to arrow, suap_login_path, target: "_top", aria: { label: "Entrar para votar: #{label}" } %>
+      <% end %>
+    <% end %>
+  </div>
+</body>
+</html>

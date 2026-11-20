@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_19_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -43,7 +43,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000000) do
   end
 
   create_table "posts", force: :cascade do |t|
+    t.string "author_key"
     t.string "author_name", limit: 100, null: false
+    t.string "author_photo_url", limit: 1024
     t.date "published_on", null: false
     t.text "body", null: false
     t.datetime "created_at", null: false
@@ -53,6 +55,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000000) do
     t.check_constraint "body ~ '[^[:space:]]'::text AND char_length(body) <= 30000", name: "posts_body_valid"
   end
 
+  create_table "votes", force: :cascade do |t|
+    t.bigint "post_id", null: false
+    t.string "voter_key", null: false
+    t.integer "value", null: false
+    t.index ["post_id", "voter_key"], name: "index_votes_on_post_id_and_voter_key", unique: true
+    t.check_constraint "value IN (-1, 1)", name: "votes_valid_value"
+  end
+
+  add_foreign_key "votes", "posts", on_delete: :cascade
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
 end

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><%= content_for?(:title) ? yield(:title) : "Mural" %> | Entrelinhas IFRN</title>
-  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/assets/caderno.css?v=perfil-8">
 </head>
 <body>
   <a class="skip" href="#principal">Pular para o conteúdo</a>
@@ -18,10 +18,21 @@
       <nav class="actions" aria-label="Ações do mural">
         <% if action_name == "index" %>
           <% dark = session[:theme] == "escuro" %>
-          <%= button_to theme_path, method: :patch, params: { theme: dark ? "claro" : "escuro", tipo: @filter, pagina: (@page if @page > 1) }, class: "theme-button", aria: { label: dark ? "Ativar tema claro" : "Ativar tema escuro" } do %>
+          <%= button_to theme_path, method: :patch, params: { theme: dark ? "claro" : "escuro", ordem: @order, tipo: @filter, pagina: (@page if @page > 1) }, class: "theme-button", aria: { label: dark ? "Ativar tema claro" : "Ativar tema escuro" } do %>
             <%= icon(dark ? "sun" : "moon") %><span>Tema <%= dark ? "claro" : "escuro" %></span>
           <% end %>
+          <% if signed_author %>
+          <details class="account-profile">
+            <summary aria-label="Mostrar nome completo da conta">
+              <%= render "shared/avatar", name: signed_author, photo: session[:suap_photo] %>
+            </summary>
+            <strong><%= signed_author %></strong>
+          </details>
+          <%= button_to "Sair", logout_path, method: :delete, class: "theme-button" %>
           <%= link_to new_post_path, class: "primary" do %><%= icon("plus") %> Nova publicação<% end %>
+          <% else %>
+            <%= link_to "Entrar com SUAP", suap_login_path, class: "primary" %>
+          <% end %>
         <% else %>
           <%= link_to root_path, class: "back" do %><%= icon("arrow-left") %> Voltar ao mural<% end %>
         <% end %>
@@ -29,6 +40,7 @@
     </div>
   </header>
   <main id="principal" class="wrap" tabindex="-1">
+    <% if alert %><p class="errors" role="alert"><%= alert %></p><% end %>
     <% if notice %><p class="notice" role="status"><%= notice %></p><% end %>
     <%= yield %>
   </main>

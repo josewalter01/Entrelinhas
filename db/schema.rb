@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_19_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_000001) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -45,11 +45,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_19_000000) do
     t.text "body", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "author_photo_url", limit: 1024
+    t.string "author_key"
     t.index ["published_on", "created_at", "id"], name: "index_posts_on_published_on_and_created_at_and_id"
     t.check_constraint "length(trim(author_name, char(9, 10, 11, 12, 13, 32))) > 0 AND length(author_name) <= 100 AND instr(author_name, char(0)) = 0", name: "posts_author_present"
     t.check_constraint "length(trim(body, char(9, 10, 11, 12, 13, 32))) > 0 AND length(body) <= 30000 AND instr(body, char(0)) = 0", name: "posts_body_valid"
   end
 
+  create_table "votes", force: :cascade do |t|
+    t.integer "post_id", null: false
+    t.string "voter_key", null: false
+    t.integer "value", null: false
+    t.index ["post_id", "voter_key"], name: "index_votes_on_post_id_and_voter_key", unique: true
+    t.check_constraint "value IN (-1, 1)", name: "votes_valid_value"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "votes", "posts", on_delete: :cascade
 end

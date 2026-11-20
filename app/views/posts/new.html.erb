@@ -13,10 +13,8 @@
       </div>
     <% end %>
     <div class="form-row">
-      <div><%= form.label :author_name, "Nome" %>
-        <%= form.text_field :author_name, required: true, maxlength: Post::MAX_AUTHOR_LENGTH, autocomplete: "name", aria: { invalid: @post.errors.include?(:author_name) } %></div>
-      <div><%= form.label :published_on, "Data de publicação" %>
-        <%= form.date_field :published_on, required: true, aria: { invalid: @post.errors.include?(:published_on) } %></div>
+      <p id="post_author_name">Publicando como<br><strong><%= signed_author %></strong></p>
+      <p>Data de publicação<br><time datetime="<%= @post.published_on.iso8601 %>"><%= l(@post.published_on, format: :mural) %></time></p>
     </div>
     <div><%= form.label :body, "Postagem" %>
       <%= form.text_area :body, required: true, rows: 8, maxlength: Post::MAX_BODY_LENGTH, aria: { invalid: @post.errors.include?(:body) } %></div>

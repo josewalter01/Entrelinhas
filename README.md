@@ -1,6 +1,6 @@
 # Entrelinhas
 
-Blog acadêmico inspirado no IFRN. A página inicial reúne relatos em ordem cronológica e permite filtrar os que têm imagem ou PDF. O formulário, o upload e a escolha de tema funcionam com HTML renderizado pelo Rails e requisições HTTP tradicionais.
+Blog acadêmico inspirado no IFRN. A página inicial abre com os relatos de maior saldo de votos, oferece a ordem “Mais recentes” e permite filtrar os que têm imagem ou PDF. O formulário, o upload e a escolha de tema funcionam com HTML renderizado pelo Rails e requisições HTTP tradicionais.
 
 ## Executar
 
@@ -30,7 +30,7 @@ No workspace original do Codex, `bash outputs/iniciar.sh` também inicia a aplic
 
 `GET /` e `GET /publicacoes` listam as postagens. `GET /publicacoes/nova` abre o formulário. `POST /publicacoes` valida e salva a publicação. Em caso de sucesso, um redirecionamento HTTP 303 leva ao mural e evita repetir o envio ao atualizar a página. Em caso de erro, o servidor devolve o formulário com status 422, valores preenchidos e mensagens vinculadas aos campos. O navegador exige selecionar o arquivo novamente.
 
-A data informada é uma coluna SQL `date`. A data inicial segue o fuso `America/Fortaleza`. O feed usa `published_on`, `created_at` e `id`, em ordem decrescente, para desempatar publicações. O texto admite 30.000 caracteres e o nome admite 100. O ERB escapa ambos. CSS preserva as quebras de linha. Um parágrafo inicial curto separado por linha em branco recebe destaque tipográfico.
+O servidor atribui a data no momento da publicação e a grava em uma coluna SQL `date`, usando o fuso `America/Fortaleza`. O feed usa `published_on`, `created_at` e `id`, em ordem decrescente, para desempatar publicações. O texto admite 30.000 caracteres e o nome admite 100. O ERB escapa ambos. CSS preserva as quebras de linha. Um parágrafo inicial curto separado por linha em branco recebe destaque tipográfico.
 
 O botão de tema no mural envia um formulário para `PATCH /tema`. O servidor guarda a opção na sessão, renderiza `data-theme` no elemento `html` e mantém o filtro ativo. O formulário de publicação herda o tema escolhido. A primeira visita usa o tema claro. CSS, fontes, ícones e fotografias são servidos localmente.
 
@@ -50,7 +50,7 @@ Em produção, use armazenamento persistente para `storage/` e defina `SECRET_KE
 
 ## Alcance do protótipo
 
-O mural é público. O nome do autor é autodeclarado. As páginas usam offset. Inserções entre cliques podem deslocar um item de página, e offsets profundos custam mais. A hospedagem requer disco persistente para os anexos ou um serviço alternativo de Active Storage.
+O mural é público. Novas publicações usam o nome do perfil autenticado no SUAP. As páginas usam offset. Inserções entre cliques podem deslocar um item de página, e offsets profundos custam mais. A hospedagem requer disco persistente para os anexos ou um serviço alternativo de Active Storage.
 
 A identificação de tipo verifica assinaturas de arquivo. Ela não equivale a uma inspeção antivírus ou à decodificação integral do documento. O navegador recebe imagens no tamanho original e o CSS limita sua exibição. O texto alternativo usa o nome do autor e o nome do arquivo. Nomes de arquivo descritivos favorecem a leitura assistiva.
 
@@ -67,6 +67,12 @@ As fontes locais são DM Sans e Newsreader. Os ícones são do Lucide. As licen�
 ## Railway
 
 No serviço Rails em produção, referencie a variável privada do serviço de banco em DATABASE_URL. Configure bin/rails db:migrate uma única vez no deploy. O arquivo db/production_schema.rb pertence ao PostgreSQL; db/schema.rb pertence ao SQLite. Faça backup dos dados existentes antes de implantar esta versão.
+
+## Login com SUAP
+
+No cadastro OAuth do IFRN, use cliente confidencial, fluxo Authorization Code e a URI de retorno exata `https://entrelinhas-production-490f5296.up.railway.app/auth/suap/callback`. No serviço Rails da Railway, defina `SUAP_CLIENT_ID` e `SUAP_CLIENT_SECRET` em Variables. Caso o provedor exija um escopo explícito, configure o valor autorizado em `SUAP_SCOPE`. Para outro domínio ou desenvolvimento local, registre a URI correspondente e defina `SUAP_REDIRECT_URI` com o mesmo valor.
+
+Publique o código e clique em **Entrar com SUAP** no mural. Após autorizar, confira o nome no formulário antes de publicar. A assinatura vem de `GET /api/rh/meus-dados/`. O perfil detalhado em `GET /api/rh/eu/` fornece a foto e, quando necessário, o nome usado na assinatura. Cada nova publicação guarda o endereço da foto no SUAP. Quando a foto está indisponível, o mural mostra as iniciais. O Rails descarta o token após consultar o perfil. A sessão do Entrelinhas dura até oito horas. O botão **Sair** encerra a sessão local. [API do IFRN](https://suap.ifrn.edu.br/api/docs/)
 
 ## Licença
 

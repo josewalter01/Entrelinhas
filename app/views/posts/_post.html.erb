@@ -1,7 +1,7 @@
 <article class="post<%= " short-story" if post.body.size <= 650 %>" id="<%= dom_id(post) %>" aria-labelledby="autor-<%= post.id %>">
   <div class="story-copy">
     <header class="byline">
-      <span class="avatar" aria-hidden="true"><%= initials(post.author_name) %></span>
+      <%= render "shared/avatar", name: post.author_name, photo: post.author_photo_url %>
       <div>
         <h3 id="autor-<%= post.id %>"><%= post.author_name %></h3>
         <time datetime="<%= post.published_on.iso8601 %>"><%= l(post.published_on, format: :mural) %></time>
@@ -29,4 +29,14 @@
       <% end %>
     <% end %>
   <% end %>
+  <div class="post-actions">
+    <%= tag.iframe title: "Votos na publicação de #{post.author_name}", class: "vote-frame",
+          srcdoc: String.new(render(partial: "posts/ballot", locals: { post: post, score: post.vote_score, current_vote: @my_votes[post.id] })) %>
+    <% if signed_author && post.author_key == session[:suap_key] %>
+      <details class="delete-post">
+        <summary aria-label="Excluir publicação" title="Excluir publicação"><span aria-hidden="true">🗑️</span></summary>
+        <%= button_to "Confirmar exclusão", post_path(post), method: :delete, params: { ordem: @order, tipo: @filter } %>
+      </details>
+    <% end %>
+  </div>
 </article>

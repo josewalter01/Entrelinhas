@@ -12,6 +12,7 @@ Bundler.require(*Rails.groups)
 module Caderno
   class Application < Rails::Application
     config.load_defaults 8.1
+    config.filter_parameters += %i[code state token client_secret code_verifier]
     config.time_zone = "America/Fortaleza"
     config.i18n.default_locale = :"pt-BR"
     config.active_storage.service = :local
