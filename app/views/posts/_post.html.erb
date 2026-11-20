@@ -1,0 +1,32 @@
+<article class="post<%= " short-story" if post.body.size <= 650 %>" id="<%= dom_id(post) %>" aria-labelledby="autor-<%= post.id %>">
+  <div class="story-copy">
+    <header class="byline">
+      <span class="avatar" aria-hidden="true"><%= initials(post.author_name) %></span>
+      <div>
+        <h3 id="autor-<%= post.id %>"><%= post.author_name %></h3>
+        <time datetime="<%= post.published_on.iso8601 %>"><%= l(post.published_on, format: :mural) %></time>
+      </div>
+    </header>
+    <% first, gap, rest = post.body.partition(/\r?\n\r?\n/) %>
+    <% unless gap.empty? %>
+      <p class="<%= first.length <= 100 ? "lead" : "prose" %>"><%= first %></p>
+      <p class="prose"><%= rest %></p>
+    <% else %>
+      <p class="prose"><%= post.body %></p>
+    <% end %>
+  </div>
+  <% if post.attachment.attached? %>
+    <% file = post.attachment.blob %>
+    <% if file.image? %>
+      <% image_path = rails_service_blob_path(file.signed_id, file.filename) %>
+      <figure>
+        <%= image_tag image_path, alt: "Imagem anexada por #{post.author_name}: #{file.filename.base.tr('_-', '  ')}", loading: "lazy" %>
+        <figcaption><%= link_to image_path do %>Abrir imagem <%= icon("arrow-up-right") %><% end %></figcaption>
+      </figure>
+    <% else %>
+      <%= link_to rails_service_blob_path(file.signed_id, file.filename, disposition: "attachment"), class: "file-link" do %>
+        <%= icon("file-text") %><span><strong><%= file.filename %></strong><small>PDF · <%= (file.byte_size / 1024.0).ceil %> KiB</small></span><%= icon("download") %>
+      <% end %>
+    <% end %>
+  <% end %>
+</article>

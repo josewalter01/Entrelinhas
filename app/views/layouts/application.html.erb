@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="<%= session[:theme] || "claro" %>">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= content_for?(:title) ? yield(:title) : "Mural" %> | Entrelinhas IFRN</title>
+  <link rel="stylesheet" href="/assets/caderno.css">
+</head>
+<body>
+  <a class="skip" href="#principal">Pular para o conteúdo</a>
+  <header class="masthead">
+    <div class="wrap topbar">
+      <%= link_to root_path, class: "identity", aria: { label: "Entrelinhas IFRN, página inicial" } do %>
+        <img class="logo light-logo" src="/assets/ifrn.svg" alt="IFRN">
+        <img class="logo dark-logo" src="/assets/ifrn-escuro.svg" alt="IFRN">
+        <span>Blog acadêmico</span>
+      <% end %>
+      <nav class="actions" aria-label="Ações do mural">
+        <% if action_name == "index" %>
+          <% dark = session[:theme] == "escuro" %>
+          <%= button_to theme_path, method: :patch, params: { theme: dark ? "claro" : "escuro", tipo: @filter, pagina: (@page if @page > 1) }, class: "theme-button", aria: { label: dark ? "Ativar tema claro" : "Ativar tema escuro" } do %>
+            <%= icon(dark ? "sun" : "moon") %><span>Tema <%= dark ? "claro" : "escuro" %></span>
+          <% end %>
+          <%= link_to new_post_path, class: "primary" do %><%= icon("plus") %> Nova publicação<% end %>
+        <% else %>
+          <%= link_to root_path, class: "back" do %><%= icon("arrow-left") %> Voltar ao mural<% end %>
+        <% end %>
+      </nav>
+    </div>
+  </header>
+  <main id="principal" class="wrap" tabindex="-1">
+    <% if notice %><p class="notice" role="status"><%= notice %></p><% end %>
+    <%= yield %>
+  </main>
+  <footer class="wrap footer"><span>Entrelinhas</span> <a href="https://portal.ifrn.edu.br/">Conheça o IFRN <%= icon("arrow-up-right") %></a></footer>
+</body>
+</html>

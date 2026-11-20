@@ -1,0 +1,24 @@
+pt-BR:
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "é obrigatório."
+      too_long: "deve ter até %{count} caracteres."
+  activerecord:
+    errors:
+      models:
+        post:
+          attributes:
+            published_on:
+              blank: "deve ser uma data válida."
+    attributes:
+      post:
+        author_name: "Nome"
+        published_on: "Data de publicação"
+        body: "Texto"
+        attachment: "Anexo"
+  date:
+    abbr_month_names: [~, jan, fev, mar, abr, mai, jun, jul, ago, set, out, nov, dez]
+    month_names: [~, janeiro, fevereiro, março, abril, maio, junho, julho, agosto, setembro, outubro, novembro, dezembro]
+    formats:
+      mural: "%d de %b de %Y"

@@ -1,0 +1,28 @@
+<% content_for :title, "Nova publicação" %>
+<section class="editor">
+  <header>
+    <h1>Nova publicação</h1>
+    <p>Compartilhe um relato, uma descoberta ou um material com a comunidade.</p>
+  </header>
+  <%= form_with model: @post, class: "post-form" do |form| %>
+    <% if @post.errors.any? %>
+      <div class="errors" role="alert">
+        <strong>Revise os campos abaixo</strong>
+        <ul><% @post.errors.each do |error| %><li><%= link_to error.full_message, "#post_#{error.attribute}" %></li><% end %></ul>
+        <% if params.dig(:post, :attachment).present? %><p>Selecione o anexo novamente antes de publicar.</p><% end %>
+      </div>
+    <% end %>
+    <div class="form-row">
+      <div><%= form.label :author_name, "Nome" %>
+        <%= form.text_field :author_name, required: true, maxlength: Post::MAX_AUTHOR_LENGTH, autocomplete: "name", aria: { invalid: @post.errors.include?(:author_name) } %></div>
+      <div><%= form.label :published_on, "Data de publicação" %>
+        <%= form.date_field :published_on, required: true, aria: { invalid: @post.errors.include?(:published_on) } %></div>
+    </div>
+    <div><%= form.label :body, "Postagem" %>
+      <%= form.text_area :body, required: true, rows: 8, maxlength: Post::MAX_BODY_LENGTH, aria: { invalid: @post.errors.include?(:body) } %></div>
+    <div><%= form.label :attachment do %>Anexo <small>(opcional)</small><% end %>
+      <%= form.file_field :attachment, accept: Post::FILE_TYPES.keys.join(","), aria: { describedby: "tipos", invalid: @post.errors.include?(:attachment) } %>
+      <p class="hint" id="tipos">JPEG, PNG, WebP ou PDF de até 8 MiB.</p></div>
+    <div class="form-actions"><%= link_to "Cancelar", root_path, class: "secondary" %><%= form.submit "Publicar", class: "primary" %></div>
+  <% end %>
+</section>

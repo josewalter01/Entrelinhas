@@ -1,0 +1,42 @@
+<header class="cover">
+  <div class="cover-copy">
+    <h1>Entrelinhas<span aria-hidden="true">.</span></h1>
+    <p>Relatos, pesquisas e descobertas de quem vive o campus.</p>
+  </div>
+  <figure class="cover-photo">
+    <img src="/assets/fachada-spp.jpg" alt="Fachada do IFRN Campus São Paulo do Potengi">
+    <figcaption>Campus São Paulo do Potengi · Alberto Medeiros / IFRN</figcaption>
+  </figure>
+</header>
+
+<section class="feed" id="publicacoes" aria-labelledby="feed-title">
+  <header class="section-title">
+    <h2 id="feed-title"><%= { "imagens" => "Publicações com imagem", "documentos" => "Publicações com PDF" }.fetch(@filter, "Mural de publicações") %></h2>
+    <nav class="filter-nav" aria-label="Filtrar publicações por anexo">
+      <% [[nil, "layout-list", "Todas"], ["imagens", "image", "Com imagem"], ["documentos", "file-text", "Com PDF"]].each do |value, symbol, label| %>
+        <%= link_to root_path(tipo: value, anchor: "publicacoes"), aria: { current: (@filter == value ? "page" : nil) } do %>
+          <%= icon(symbol) %><span><%= label %><% unless value %><span class="long-label"> as publicações</span><% end %></span>
+        <% end %>
+      <% end %>
+    </nav>
+  </header>
+  <div class="feed-results" data-category="<%= @filter || "todas" %>">
+    <% if @posts.any? %>
+      <%= render @posts %>
+    <% elsif @page > 1 %>
+      <p>Não há publicações nesta página. <%= link_to "Voltar à primeira página", root_path(tipo: @filter) %></p>
+    <% else %>
+      <div class="empty">
+        <%= icon("book-open") %><h3><%= @filter ? "Nenhuma publicação neste filtro" : "O mural começa com você" %></h3>
+        <p><%= @filter ? "Explore o mural completo para ler as outras publicações." : "Compartilhe a primeira experiência da sua comunidade acadêmica." %></p>
+        <%= link_to(@filter ? "Ver todas as publicações" : "Criar primeira publicação", @filter ? root_path : new_post_path, class: "primary") %>
+      </div>
+    <% end %>
+  </div>
+  <% if @page > 1 || @has_next %>
+    <nav class="pagination" aria-label="Páginas do mural">
+      <%= link_to "Página anterior", root_path(pagina: @page - 1, tipo: @filter, anchor: "publicacoes"), rel: "prev" if @page > 1 %>
+      <%= link_to "Próxima página", root_path(pagina: @page + 1, tipo: @filter, anchor: "publicacoes"), rel: "next" if @has_next %>
+    </nav>
+  <% end %>
+</section>
