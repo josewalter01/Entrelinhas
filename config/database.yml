@@ -12,5 +12,7 @@ test:
   database: tmp/test.sqlite3
 
 production:
-  <<: *default
-  database: storage/production.sqlite3
+  adapter: postgresql
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  url: <%= ENV.fetch("DATABASE_URL").to_json if Rails.env.production? %>
+  schema_dump: production_schema.rb

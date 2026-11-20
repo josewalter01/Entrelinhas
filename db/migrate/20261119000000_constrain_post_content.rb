@@ -1,5 +1,11 @@
 class ConstrainPostContent < ActiveRecord::Migration[8.1]
   def change
+    if connection.adapter_name == "PostgreSQL"
+      add_check_constraint :posts, "author_name ~ '[^[:space:]]'", name: "posts_author_present"
+      add_check_constraint :posts, "body ~ '[^[:space:]]' AND char_length(body) <= 30000", name: "posts_body_valid"
+      return
+    end
+
     # SQLite does not enforce the declared width of a varchar column.
     whitespace = "char(9, 10, 11, 12, 13, 32)"
     add_check_constraint :posts,

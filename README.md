@@ -4,7 +4,7 @@ Blog acadêmico inspirado no IFRN. A página inicial reúne relatos em ordem cro
 
 ## Executar
 
-Use Ruby 3.4.x e Bundler. O projeto foi validado com Ruby 3.4.6 e Rails 8.1.4.1. O banco SQLite roda no mesmo processo da aplicação. Na pasta que contém o Gemfile:
+Use Ruby 3.4.x e Bundler. O projeto foi validado com Ruby 3.4.6 e Rails 8.1.4.1. Desenvolvimento e testes usam SQLite local. Produção usa PostgreSQL pela variável DATABASE_URL. Na pasta que contém o Gemfile:
 
 ```sh
 bundle install
@@ -12,7 +12,7 @@ bin/rails db:prepare
 bin/rails server
 ```
 
-Abra [o mural local](http://localhost:3000). Na primeira preparação, o Rails cria o esquema e carrega três exemplos. Em uma instalação nova, use `bin/rails db:migrate` para começar com o mural vazio. Se o Bundler precisar compilar extensões na sua plataforma, instale as ferramentas de compilação do Ruby e os cabeçalhos de SQLite do sistema.
+Abra [o mural local](http://localhost:3000). Na primeira preparação, o Rails cria o esquema e o mural começa vazio. Se o Bundler precisar compilar extensões na sua plataforma, instale as ferramentas de compilação do Ruby e os cabeçalhos de SQLite do sistema.
 
 No workspace original do Codex, `bash outputs/iniciar.sh` também inicia a aplicação usando o Ruby já preparado.
 
@@ -21,13 +21,12 @@ No workspace original do Codex, `bash outputs/iniciar.sh` também inicia a aplic
 | Responsabilidade | Onde encontrar |
 | --- | --- |
 | Atributos, validações, consulta do feed e regras dos anexos | `app/models/post.rb` |
-| Mural, filtros, formulário, parâmetros permitidos e criação | `app/controllers/posts_controller.rb` |
-| Preferência de tema na sessão | `app/controllers/themes_controller.rb` |
+| Mural, filtros, formulário, criação e preferência de tema | `app/controllers/application_controller.rb` |
 | HTML compartilhado, idioma, estilos e cabeçalho | `app/views/layouts/application.html.erb` |
 | Feed, card reutilizado e formulário | `app/views/posts/` |
 | Paleta, tipografia, foco e layout responsivo | `public/assets/caderno.css` |
 | Banco e serviço de arquivos de cada ambiente | `config/database.yml` e `config/storage.yml` |
-| Evolução do esquema e dados de demonstração | `db/migrate/` e `db/seeds.rb` |
+| Evolução do esquema e inicialização do banco | `db/migrate/` e `db/seeds.rb` |
 
 `GET /` e `GET /publicacoes` listam as postagens. `GET /publicacoes/nova` abre o formulário. `POST /publicacoes` valida e salva a publicação. Em caso de sucesso, um redirecionamento HTTP 303 leva ao mural e evita repetir o envio ao atualizar a página. Em caso de erro, o servidor devolve o formulário com status 422, valores preenchidos e mensagens vinculadas aos campos. O navegador exige selecionar o arquivo novamente.
 
@@ -39,27 +38,15 @@ O botão de tema no mural envia um formulário para `PATCH /tema`. O servidor gu
 
 Cada publicação aceita um anexo de até 8 MiB. O servidor verifica o tamanho, identifica o tipo pelos bytes com Marcel e compara o resultado com a extensão. JPEG, PNG e WebP aparecem como imagens. O PDF é servido como download. Os anexos usam chaves internas do Active Storage e ficam fora de `public/`. As duas rotas públicas de leitura usam assinaturas do Rails. A única entrada pública de arquivos é o formulário da postagem.
 
-A aplicação usa proteção CSRF e política de conteúdo com `script-src 'none'` e `object-src 'none'`. O SQLite guarda as publicações e os metadados dos anexos. O Active Storage guarda os arquivos em disco.
+A aplicação usa proteção CSRF e política de conteúdo com `script-src 'none'` e `object-src 'none'`. O banco relacional guarda as publicações e os metadados dos anexos. O Active Storage guarda os arquivos em disco.
 
-| Ambiente | Banco SQLite | Anexos |
+| Ambiente | Banco | Anexos |
 | --- | --- | --- |
 | Desenvolvimento | `storage/development.sqlite3` | `storage/files/` |
-| Teste | `tmp/test.sqlite3` | Pasta temporária da suíte, removida ao concluir |
-| Produção | `storage/production.sqlite3` | `storage/files/` |
+| Teste | `tmp/test.sqlite3` | `tmp/test-files/` |
+| Produção | PostgreSQL via `DATABASE_URL` | `storage/files/` |
 
-Em produção, use armazenamento persistente para `storage/` e defina `SECRET_KEY_BASE` no ambiente. Para backup do banco e dos arquivos em conjunto, pare o processo Rails antes de copiar o diretório. O SQLite admite um escritor por vez. O tamanho da página do feed é 20. O controller busca um registro adicional para detectar a próxima página e carrega os anexos em lote.
-
-## Testes e cobertura
-
-```sh
-RAILS_ENV=test bin/rails db:prepare
-bin/rails test test/models
-bin/rails test test/integration
-COVERAGE=1 bin/rails test
-bin/rails zeitwerk:check
-```
-
-Resultado verificado: **7 testes de model e 14 de integração, com 187 asserções**, todos aprovados. A suíte verifica constraints por escritas que contornam as validações Rails, upload e download dos bytes, erros, ordenação, filtros, paginação, alterações no mural e isolamento da preferência de tema entre sessões. SimpleCov mediu **80 de 80 linhas executáveis de Ruby em `app/` (100%)**. O relatório local fica em `coverage/index.html`. ERB e CSS ficam fora dessa métrica.
+Em produção, use armazenamento persistente para `storage/` e defina `SECRET_KEY_BASE` no ambiente. Em produção, faça backup do PostgreSQL e dos arquivos do Active Storage em conjunto, com as escritas suspensas. O SQLite admite um escritor por vez. O tamanho da página do feed é 20. O controller busca um registro adicional para detectar a próxima página e carrega os anexos em lote.
 
 ## Alcance do protótipo
 
@@ -73,7 +60,16 @@ A inspeção visual usou Chromium em Linux. A entrega não inclui auditoria com 
 
 A paleta parte do verde `#2f9e41` e do vermelho `#cd191e` do manual institucional. Os botões usam verde mais escuro no tema claro e verde claro no tema escuro para manter a leitura. Os logotipos são do portal do IFRN. O Entrelinhas é um protótipo acadêmico independente. [Manual de Aplicação da Marca, página 14](https://portal.ifrn.edu.br/documents/3770/Manual_da_marca_2.pdf).
 
-A foto da fachada do Campus São Paulo do Potengi, de Alberto Medeiros, vem do [acervo do IFRN](https://portal.ifrn.edu.br/campus/reitoria/noticias/campus-sao-paulo-do-potengi-inicia-inscricoes-para-os-primeiros-cursos/). A vista aérea da cidade que acompanha a publicação de exemplo vem da [página do campus](https://portal.ifrn.edu.br/campus/sao-paulo-do-potengi/). Autores e relatos de demonstração são fictícios.
+A foto da fachada do Campus São Paulo do Potengi, de Alberto Medeiros, vem do [acervo do IFRN](https://portal.ifrn.edu.br/campus/reitoria/noticias/campus-sao-paulo-do-potengi-inicia-inscricoes-para-os-primeiros-cursos/). A vista aérea da cidade em `public/assets/vista-de-sao-paulo-do-potengi.jpg` vem da [página do campus](https://portal.ifrn.edu.br/campus/sao-paulo-do-potengi/).
 
 As fontes locais são DM Sans e Newsreader. Os ícones são do Lucide. As licenças acompanham os arquivos em `public/assets/`.
-# Entrelinhas
+
+## Railway
+
+No serviço Rails em produção, referencie a variável privada do serviço de banco em DATABASE_URL. Configure bin/rails db:migrate uma única vez no deploy. O arquivo db/production_schema.rb pertence ao PostgreSQL; db/schema.rb pertence ao SQLite. Faça backup dos dados existentes antes de implantar esta versão.
+
+## Licença
+
+O código do Entrelinhas é distribuído sob a GNU Affero General Public License, versão 3. [Leia a licença completa](LICENSE).
+
+Os créditos das fotografias, marcas, fontes e ícones estão na seção [Identidade e créditos](#identidade-e-créditos).
