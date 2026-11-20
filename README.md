@@ -77,3 +77,4 @@ A foto da fachada do Campus São Paulo do Potengi, de Alberto Medeiros, vem do [
 
 As fontes locais são DM Sans e Newsreader. Os ícones são do Lucide. As licenças acompanham os arquivos em `public/assets/`.
 # Entrelinhas
+# Entrelinhas
