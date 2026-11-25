@@ -1,6 +1,6 @@
 # Entrelinhas
 
-Blog acadêmico inspirado no IFRN. A página inicial abre com os relatos de maior saldo de votos, oferece a ordem “Mais recentes” e permite filtrar os que têm imagem ou PDF. O formulário, o upload e a escolha de tema funcionam com HTML renderizado pelo Rails e requisições HTTP tradicionais.
+[EXPERIMENTAL] Blog acadêmico inspirado no IFRN. A página inicial abre com os relatos de maior saldo de votos, oferece a ordem “Mais recentes” e permite filtrar os que têm imagem ou PDF. O formulário, o upload e a escolha de tema funcionam com HTML renderizado pelo Rails e requisições HTTP tradicionais.
 
 ## Executar
 
